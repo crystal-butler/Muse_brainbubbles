@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html >
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="google" value="notranslate">
+    <title>Thought Bubbles</title>      
+    <link rel="stylesheet" href="/bubbles.css">
+    
+    <style>
+      canvas {
+        background: #023;
+        display: block; 
+      }
+    </style>
+
+    <script>
+      window.console = window.console || function(t) {};
+      window.open = function(){ console.log("window.open is disabled."); };
+      window.print   = function(){ console.log("window.print is disabled."); };
+    </script>
+
+    <script src="prefixfree.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <script src="soulwire_sketch.min.js"></script>
+    <script src="http://127.0.0.1:8081/socket.io/socket.io.js" type="text/javascript"></script>
+    <script src="Muse.js"></script>
+    <script src="main.js" type="text/javascript"></script>
+
+  </head>
+
+  <body>
+
+    Muse.connect();
+    
+    <script>
+      
+      (function() {
+        var Particle, particleCount, particles, sketch, z;
+
+        sketch = Sketch.create();
+
+        particles = [];
+
+        particleCount = 500;
+
+        sketch.strokeStyle = 'hsla(200, 50%, 50%, .4)';
+
+        sketch.globalCompositeOperation = 'lighter';
+
+        Particle = function() {
+          this.x = random(sketch.width);
+          this.y = random(sketch.height); 
+          this.vx = 5;
+          this.vy = -random(1, 10) / 5;
+          this.radius = this.baseRadius = 1;
+          this.maxRadius = 65;
+          return this.hue = random(180, 320);
+        };
+
+        Particle.prototype = {
+          update: function() {
+            var dist, distx, disty, radius;
+            distx = this.x - sketch.width/2;
+            disty = this.y;
+            
+            if (disty < sketch.height) {
+              radius = (this.baseRadius - ((disty + 0.07 * sketch.height) / sketch.height)) * this.maxRadius;
+                if (radius > this.maxRadius) {
+                  this.radius = this.maxRadius; 
+                } else if (radius < this.baseRadius) {
+                  this.radius = this.baseRadius;
+                } else {
+                  this.radius = radius;
+                }    
+            } else {
+              this.radius = this.baseRadius;
+            }
+            this.vx += (random(100) - 50) / 1000;
+            this.vy -= random(100) / 10000;
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < -this.maxRadius || this.x > sketch.width + this.maxRadius || this.y < -this.maxRadius) {
+              this.x = random(sketch.width);
+              this.y = random(sketch.height + this.maxRadius, sketch.height * 2);
+              this.vx = 0;
+              return this.vy = -random(1, 10) / 5;
+            }
+        },
+          render: function() {
+            sketch.beginPath();
+            sketch.arc(this.x, this.y, this.radius, 0, TWO_PI);
+            sketch.closePath();
+            sketch.fillStyle = 'hsla(' + this.hue + ', 60%, 40%, .35)';
+            sketch.fill();
+            return sketch.stroke();
+          }
+        };
+
+        z = particleCount;
+
+        while (z--) {
+          particles.push(new Particle());
+        }
+
+        sketch.clear = function() {
+          return sketch.clearRect(0, 0, sketch.width, sketch.height);
+        };
+
+        sketch.update = function() {
+          var i, results;
+          i = particles.length;
+          results = [];
+          while (i--) {
+            results.push(particles[i].update());
+          }
+          return results;
+        };
+
+        sketch.draw = function() {
+          var i, results;
+          i = particles.length;
+          results = [];
+          while (i--) {
+            results.push(particles[i].render());
+          }
+          return results;
+        };
+
+      }).call(this);      
+    </script>
+    
+    <script>
+      if (document.location.search.match(/type=embed/gi)) {
+        window.parent.postMessage("resize", "*");
+      }
+    </script> 
+
+  </body>
+
+</html>
+ 
